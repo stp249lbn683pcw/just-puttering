@@ -38,7 +38,7 @@ subroutine checks the “market_price” table in the SQL Server “market_data�
 price data for that ticker symbol in the database.  If end-of-day stock price data already exists, then the subroutine just downloads 
 the most recent data up to the current day.  The data is downloaded starting 4 days before the current day in case some recent values 
 have changed. If there is no end-of-day stock price data for the ticker symbol in the database, then all of the data up to the current 
-day is downloaded to a CSV file.  After downloading the data for 117 ticker symbols, the subroutine waits for one minute 20 seconds 
+day is downloaded to a CSV file.  After downloading the data for 116 ticker symbols, the subroutine waits for one minute 20 seconds 
 because the TD Ameritrade API returns an error if more than 120 requests are made in one minute (and I allowed some extra wiggle room).  
 The inputs to the subroutine are the filenames of the text files for the consumer key, access token and ticker list, the name of the 
 folder where the output CSV files will be stored, and the database data source name.  The database data source name is the name listed 
@@ -57,7 +57,7 @@ and the database data source name.
 There are also buttons labelled “Download fundamental data for database” that download fundamental data for each ticker symbol.  
 There are corresponding buttons labelled “Update Database” that store the fundamental data in the “fundamentals” table in the database.  
 I don’t currently make use of the fundamental data in my Excel workbooks and the subroutines are similar to subroutines that I described 
-above so I’m not going to give a detailed explanation of these subroutines but I have included the code below.
+above so I’m not going to give a detailed explanation of these subroutines but I have included the code.
 
 The user needs to specify the data source name, the folder locations and the text file names either in the InitializeDefaults subroutine 
 or else in the external text file “GetStockData.ini” that is read by the ReadDefaults subroutine if it exists.
