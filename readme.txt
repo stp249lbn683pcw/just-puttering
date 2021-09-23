@@ -60,7 +60,9 @@ I don’t currently make use of the fundamental data in my Excel workbooks and t
 above so I’m not going to give a detailed explanation of these subroutines but I have included the code.
 
 The user needs to specify the data source name, the folder locations and the text file names either in the InitializeDefaults subroutine 
-or else in the external text file “GetStockData.ini” that is read by the ReadDefaults subroutine if it exists.
+or else in the external text file “GetStockData.ini” that is read by the ReadDefaults subroutine if it exists. IMPORTANT: The program
+deletes the files in the folders so that old files won't get mixed in with new files so the folders should not contain other files
+that the user wants to save!
 
 Below, I have included information about the structure of the database tables. I have also included an Excel VBA function that shows 
 how I read the end-of-day stock prices from the database data into Microsoft Excel.  I normally use the last 120 market days in my 
