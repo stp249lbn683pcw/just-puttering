@@ -2,7 +2,7 @@
 ' Modified on 7Aug21 to add downoad of fundamental data.
 ' Modified on 15Sep21 to use structure INPUTTYPE
 ' Modified on 3Oct21 to remove some unnecessary code in UpdateTickerList.
-' Last updated on 15Sep21.
+' Last updated on 3Oct21.
 
 
 Option Strict Off
