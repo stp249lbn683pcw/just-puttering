@@ -70,7 +70,7 @@ Excel calculations so that errors in calculations (such as exponential moving av
 
 The Excel VBA function that I use to read the end-of-day stock prices from the database data into Microsoft Excel is below.
 
-Function UpdateWorkSheetFromDatabase%(DataSource$, NumTickers%, tickers$(), NumRowsPerTicker%(), StartRow&, oSheet As Worksheet)
+Function UpdateWorkSheetFromDatabase%(DataSource$, NumTickers%, tickers$(), NumRowsPerTicker%(), StartRow&, oSheetList As Worksheet)
   UpdateWorkSheetFromDatabase = 0
   Dim cn As ADODB.Connection
   Dim rst As ADODB.Recordset
