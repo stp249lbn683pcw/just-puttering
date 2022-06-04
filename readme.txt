@@ -60,7 +60,7 @@ I don’t currently make use of the fundamental data in my Excel workbooks and t
 above so I’m not going to give a detailed explanation of these subroutines but I have included the code.
 
 The user needs to specify the data source name, the folder locations and the text file names either in the InitializeDefaults subroutine 
-or else in the external text file “GetStockData.ini” that is read by the ReadDefaults subroutine if it exists. IMPORTANT: The program
+or else in the external text file “GetStockData.ini” that is read by the ReadDefaults subroutine if it exists.  IMPORTANT: The program
 deletes the files in the folders so that old files won't get mixed in with new files so the folders should not contain other files
 that the user wants to save!
 
@@ -70,7 +70,7 @@ Excel calculations so that errors in calculations (such as exponential moving av
 
 The Excel VBA function that I use to read the end-of-day stock prices from the database data into Microsoft Excel is below.
 
-Function UpdateWorkSheetFromDatabase%(DataSource$, NumTickers%, tickers$(), NumRowsPerTicker%(), StartRow&, oSheetList As Worksheet)
+Function UpdateWorkSheetFromDatabase%(DataSource$, NumTickers%, tickers$(), NumRowsPerTicker%(), StartRow&, oSheet As Worksheet)
   UpdateWorkSheetFromDatabase = 0
   Dim cn As ADODB.Connection
   Dim rst As ADODB.Recordset
@@ -242,3 +242,10 @@ View dbo.get_fundamental_field_names
 SELECT        COLUMN_NAME
 FROM            INFORMATION_SCHEMA.COLUMNS
 WHERE        (TABLE_NAME = N'fundamentals')
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
