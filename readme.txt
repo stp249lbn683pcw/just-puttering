@@ -22,8 +22,8 @@ Although there is a button on the program’s input form labelled “Get Refresh
 token.  Since a new refresh token is only required every 3 months and using the TD Ameritrade’s Web pages to obtain a new refresh token 
 requires logging into a TD Ameritrade account to obtain a new authorization code, I thought it was safer from a security standpoint to 
 just use TD Ameritrade’s Web pages.  This is a little tedious since the authorization code that is returned by one Web page has to the 
-URL decoded and then entered into another Web page (I use a small Visual Basic.Net program to do the URL decode).  I saved the refresh 
-token and consumer key in separate text files for use by the program.
+URL decoded and then entered into another Web page (I use a small Visual Basic.Net program to do the URL decode; this is just 
+s2 = Uri.UnescapeDataString(s1)).  I saved the refresh token and consumer key in separate text files for use by the program.
 
 In the program, the button labelled “Get Access Token” calls a subroutine that obtains a new access token for the TD Ameritrade API. 
 The subroutine reads the consumer key and refresh token from separate text input files and stores the returned access token in a 
