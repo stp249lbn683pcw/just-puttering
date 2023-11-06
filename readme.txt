@@ -1,3 +1,11 @@
+Important update on 11/5/2023
+This program is rapidly becoming obsolete because TD Ameritrade accounts are
+being moved to Schwab. In fact, I can no longer use it myself. Schwab is
+supposed to have or be developing a Schwab Developer Portal with a similar
+trading API. I am still trying to figure out whether it is presently available
+for use.  I am leaving the code here for the present in case it is helpful to
+someone with some other application.
+
 This folder contains an example of using TD Ameritrade’s Web API (see developer.tdameritrade.com) to maintain and update a database of 
 end-of-day stock prices.  I am writing this in case someone finds it helpful since I have combined information that I found from 
 various sources.  I personally use the data from the database for the calculations that I do in some of my Excel workbooks.
