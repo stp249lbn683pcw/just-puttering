@@ -6,6 +6,40 @@ trading API. I am still trying to figure out whether it is presently available
 for use.  I am leaving the code here for the present in case it is helpful to
 someone with some other application.
 
+Update on 1/4/2024
+I have grown impatient about waiting for Schab to make the Trading API
+documentation available under the Schab Developer Portal and to approve
+pending requests to use it.  I have programs for backtesting different
+strategies and using those strategies to tell me when to buy or sell
+stocks/ETFs that I cannot use without up-to-date stock historical data. So I
+have added an option to the program to use the free version of the polygon.io
+trading API to update the stock historical data in the database.
+
+There are significant disadvantages to using the polygon.io API compared to
+the TD Ameritrade API.  The free version allows access to only 2 years of
+historical data so I cannot use it to add a full record of historical data
+for a new stock.  However I can use it to keep a stock that is already in the
+database up-to-date.  Also, the free version only allows 5 API calls per minute
+so updating the historical data for 100 stocks would take 20 minutes (if
+someone was using one of the paid versions then they would probably want to
+change the 65 second delay that I built into the program after every 5 API
+calls). The TD Ameritrade API allowed 120 API calls per minute.  The free
+version does not return OHLC values for the current day until after midnight.
+The TD Ameritrade API returned the current day's OHLC values after the market
+close and even returned the OHLC values up to the current time if it was called
+before market close.
+
+Using the free version of the polyogn.io API is simpler than using the TD
+Ameritrade API since it only needs the API key. The program assumes that the API
+key is stored in an external text file.  The filename (incuding the path) can be
+specified in the InitializeDefaults subroutine or in the external
+GetStockData.ini text file (which is assumed to be located in the application
+folder; the same file as the executable). I cannot check the TD Ameritrade
+option any more since my account was moved to Schwab so I am hoping that these
+changes have not inadvertently disabled it.
+
+The original description of the program is below:
+
 This folder contains an example of using TD Ameritrade’s Web API (see developer.tdameritrade.com) to maintain and update a database of 
 end-of-day stock prices.  I am writing this in case someone finds it helpful since I have combined information that I found from 
 various sources.  I personally use the data from the database for the calculations that I do in some of my Excel workbooks.

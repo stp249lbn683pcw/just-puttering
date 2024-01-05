@@ -1,8 +1,16 @@
-﻿' Updated on 30Jun21 to increase array sizes from 300 to 500.
+﻿' Updated on 30Jun21 to increase array sizes from 300 to 500 for the maximum number of ticker symbols in the database.
 ' Modified on 7Aug21 to add downoad of fundamental data.
 ' Modified on 15Sep21 to use structure INPUTTYPE
 ' Modified on 3Oct21 to remove some unnecessary code in UpdateTickerList.
-' Last updated on 3Oct21.
+' modified on 13Sep22 to allow the user to enter or select the ticker symbol list file names
+' in the form.
+' Modified on 28Jun23 to handle a problem adding the fundamental data for symbol "$VIX.X" to the database because it did not have a cusip value.
+' I modified the code slightly to handle the case where a database table field (such as cusip) is missing from the fundamental input data.
+' Modified on 5Jul23 to check that arrays sizes are not exceeded. This was known to be possible but the array sizes were large enough that
+' I did not expect them to be exceeded for the number of stock symbols that I expected to use. Note that items that exceed the array sizes
+' will simply be ignored; there is no error message.
+' Modified on 4Jan24 to use the Polygon.io API as an alternative to the TD Ameritrade API
+' Last updated on 5Jan24.
 
 
 Option Strict Off
@@ -17,11 +25,9 @@ Imports System.Threading
 Imports Microsoft.office.interop
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
+Imports System.Runtime.InteropServices.ComTypes
+
 Structure INPUTTYPE
-  Dim file_consumer_key$
-  Dim file_refresh_token$
-  Dim file_access_token_response$
-  Dim file_access_token$
   Dim indicator_file$
   Dim data_source$
   Dim ticker_list_file$
@@ -32,6 +38,14 @@ Structure INPUTTYPE
   Dim csv1_folder$
   Dim fundamental_response_folder$
   Dim fundamental_response1_folder$
+  Dim trading_API$
+  ' TD Ameritrade API
+  Dim file_consumer_key$
+  Dim file_refresh_token$
+  Dim file_access_token_response$
+  Dim file_access_token$
+  ' Polygon.io API
+  Dim file_polygon_io_api_key$
 End Structure
 
 Module Module1
@@ -41,10 +55,6 @@ Module Module1
 
   Sub InitializeDefaults()
     With UserInput
-      .file_consumer_key = "c:\consumer_key.txt"
-      .file_refresh_token = "c:\refresh_token.txt"
-      .file_access_token_response = "c:\access_token_response.txt"
-      .file_access_token = "c:\access_token.txt"
       .indicator_file = "c:\indicator_files.txt"
       .data_source = "your data source name goes here"
       .ticker_list_file = "c:\ticker_list.txt"
@@ -55,6 +65,14 @@ Module Module1
       .csv1_folder = "c:\download1"
       .fundamental_response_folder = "c:\download_fundamental_response"
       .fundamental_response1_folder = "c:\download_fundamental_response1"
+      .trading_API = "TD Ameritrade"
+      ' TD Ameritrade API
+      .file_consumer_key = "c:\consumer_key.txt"
+      .file_refresh_token = "c:\refresh_token.txt"
+      .file_access_token_response = "c:\access_token_response.txt"
+      .file_access_token = "c:\access_token.txt"
+      ' Polygon.io API
+      .file_polygon_io_api_key = "c:\polygon_io_api_key.txt"
     End With
   End Sub
 
@@ -77,14 +95,6 @@ Module Module1
           If line.Length <= 0 Then Exit Function
           Dim items = line.Split(",")
           Select Case (Trim$(items(0)))
-            Case "file_consumer_key"
-              .file_consumer_key = items(1)
-            Case "file_refresh_token"
-              .file_refresh_token = items(1)
-            Case "file_access_token_response"
-              .file_access_token_response = items(1)
-            Case "file_access_token"
-              .file_access_token = items(1)
             Case "indicator_file"
               .indicator_file = items(1)
             Case "data_source"
@@ -105,6 +115,20 @@ Module Module1
               .fundamental_response_folder = items(1)
             Case "fundamental_response1_folder"
               .fundamental_response1_folder = items(1)
+            Case "trading_API"
+              .trading_API = items(1)
+            'TD Ameritrade API
+            Case "file_consumer_key"
+              .file_consumer_key = items(1)
+            Case "file_refresh_token"
+              .file_refresh_token = items(1)
+            Case "file_access_token_response"
+              .file_access_token_response = items(1)
+            Case "file_access_token"
+              .file_access_token = items(1)
+            'Polygon.io API
+            Case "file_polygon_io_api_key"
+              .file_polygon_io_api_key = items(1)
           End Select
         End While
       End With
@@ -115,6 +139,59 @@ Module Module1
       Exit Function
     End Try
     ReadDefaults = 0
+  End Function
+  Function ReadEntries(ByVal sFileName$)
+    ReadEntries = 0
+    If (Dir(sFileName$) = "") Then Exit Function
+    If Not File.Exists(sFileName) Then Exit Function
+    Dim line$
+    ReadEntries = -1
+    line = ""
+
+    Try
+      Dim reader As New StreamReader(sFileName)
+      With UserInput
+        While (Not reader.EndOfStream)
+          line = reader.ReadLine()
+          If (line Is Nothing) Then Exit Function
+          line = line.Trim
+          If line.Length <= 0 Then Exit Function
+          Dim items = line.Split(",")
+          Select Case (Trim$(items(0)))
+            Case "ticker_list_file"
+              .ticker_list_file = items(1)
+            Case "ticker_list1_file"
+              .ticker_list1_file = items(1)
+            Case "trading_API"
+              .trading_API = items(1)
+          End Select
+        End While
+      End With
+      reader.Close()
+    Catch e As Exception
+      MessageBox.Show("Error in file " & sFileName & ": " & e.Message)
+      ReadEntries = -2
+      Exit Function
+    End Try
+    ReadEntries = 0
+  End Function
+  Function SaveEntries(ByVal sFileName$)
+    SaveEntries = -1
+    If File.Exists(sFileName) Then File.Delete(sFileName)
+    Try
+      Dim writer1 As New StreamWriter(sFileName)
+      With UserInput
+        writer1.WriteLine("ticker_list_file," & .ticker_list_file.Trim)
+        writer1.WriteLine("ticker_list1_file," & .ticker_list1_file.Trim)
+        writer1.WriteLine("trading_API," & .trading_API.Trim)
+      End With
+      writer1.Close()
+    Catch e As Exception
+      MessageBox.Show("Error writing file " & sFileName & ": " & e.Message)
+      SaveEntries = -2
+      Exit Function
+    End Try
+    SaveEntries = 0
   End Function
 
   Async Sub GetAccessCode(file_consumer_key$, file_refresh_token$, file_access_token_response$, file_access_token$)
@@ -169,24 +246,27 @@ Module Module1
   Async Sub DownloadHistData(file_consumer_key$, file_access_token$, ticker_list_file$, response_folder$, csv_folder$, data_source$)
     Dim consumer_key$, access_token$, content$
     Dim file_price_history_response$, file_price_history$
-    Dim err%, i%, n%, count%, s$, s1$, s2$, s3$
+    Dim err%, i%, n%, count%, limit%, limit1%, s$, s1$, s2$, s3$
     Dim url$, year1$, month1$, day1$
 
+    limit = 299
+    limit1 = 500
     access_token = ""
     consumer_key = ""
+
     err = ReadTextFromFile(file_consumer_key, consumer_key)
     If err < 0 Then Exit Sub
     err = ReadTextFromFile(file_access_token, access_token)
     If err < 0 Then Exit Sub
 
-    Dim tickers$(0 To 299), num_tickers%, line$
+    Dim tickers$(0 To limit), num_tickers%, line$
     num_tickers = 0
     Try
       Dim reader As New StreamReader(ticker_list_file)
-      While Not reader.EndOfStream
+      While Not reader.EndOfStream And num_tickers <= limit
         line = reader.ReadLine()
         If (line Is Nothing) Then Exit While
-        line = line.Trim
+        line = line.Trim.ToUpper
         If line.Length > 0 Then
           'Dim items = line.Split(",")
           tickers(num_tickers) = line
@@ -203,7 +283,7 @@ Module Module1
       MessageBox.Show("No ticker symbols found in ticker symbol list file")
     End If
 
-    Dim tickers_db$(0 To 500), dates1$(0 To 500), num_tickers_db%
+    Dim tickers_db$(0 To limit1), dates1$(0 To limit1), num_tickers_db%
     Dim market_price_db$ = "Data Source=" & data_source & ";Initial Catalog=market_data;Integrated Security=True;"
     Dim cn As New SqlConnection() ' Don't put this statement in a try block; it throws an exception!!!
     cn.ConnectionString = market_price_db
@@ -217,7 +297,7 @@ Module Module1
       cmd.CommandText = "Select * from dbo.[Get_Last_Date]"
       dr = cmd.ExecuteReader
       num_tickers_db = 0
-      While dr.Read()
+      While dr.Read() And num_tickers_db <= limit1
         tickers_db(num_tickers_db) = dr("Ticker")
         dates1(num_tickers_db) = dr("Last_Date")
         num_tickers_db = num_tickers_db + 1
@@ -265,9 +345,9 @@ Module Module1
     For i = 0 To num_tickers - 1
       Application.DoEvents()
       num_requests = num_requests + 1
-      If num_requests >= 117 Then
+      If num_requests > 116 Then
         Thread.Sleep(80000) ' pause for 1 minute 20 seconds
-        num_requests = 0
+        num_requests = 1
       End If
 
       If num_tickers_db <= 0 Then
@@ -363,12 +443,186 @@ Module Module1
     Next
     MessageBox.Show("Download finished")
   End Sub
+
+  Async Sub DownloadHistDataPolygonIo(file_polygon_io_API_key$, ticker_list_file$, response_folder$, csv_folder$, data_source$)
+    Dim content$, polygon_io_API_key$
+    Dim file_price_history_response$, file_price_history$
+    Dim err%, i%, n%, count%, s$, s1$, s2$, s3$
+    Dim url$, year1$, month1$, day1$
+
+    polygon_io_API_key = ""
+    err = ReadTextFromFile(file_polygon_io_API_key, polygon_io_API_key)
+    If err < 0 Then Exit Sub
+
+    Dim num_tickers%, line$
+    Dim lstTickers As New List(Of String)
+    num_tickers = 0
+    Try
+      Dim reader As New StreamReader(ticker_list_file)
+      While Not reader.EndOfStream
+        line = reader.ReadLine()
+        If (line Is Nothing) Then Exit While
+        line = line.Trim.ToUpper
+        If line.Length > 0 Then
+          'Dim items = line.Split(",")
+          lstTickers.Add(line)
+          num_tickers = num_tickers + 1
+        End If
+      End While
+      reader.Close()
+    Catch e As Exception
+      MessageBox.Show("Error in file " & ticker_list_file & ": " & e.Message)
+      Exit Sub
+    End Try
+
+    If num_tickers <= 0 Then
+      MessageBox.Show("No ticker symbols found in ticker symbol list file")
+      Exit Sub
+    End If
+    Dim tickers$() = lstTickers.ToArray
+
+    Dim lstTickersDb, lstDates1 As New List(Of String)
+    Dim num_tickers_db%
+    Dim market_price_db$ = "Data Source=" & data_source & ";Initial Catalog=market_data;Integrated Security=True;"
+    Dim cn As New SqlConnection() ' Don't put this statement in a try block; it throws an exception!!!
+    cn.ConnectionString = market_price_db
+    cn.Open()
+
+    Dim cmd As New SqlCommand, dr As SqlDataReader
+    Try
+      'Dim cn As New SqlConnection(market_price_db)
+
+      cmd.Connection = cn
+      cmd.CommandText = "Select * from dbo.[Get_Last_Date]"
+      dr = cmd.ExecuteReader
+      num_tickers_db = 0
+      While dr.Read()
+        lstTickersDb.Add(dr("Ticker"))
+        lstDates1.Add(dr("Last_Date"))
+        num_tickers_db = num_tickers_db + 1
+      End While
+      dr.Close()
+      cmd.Dispose()
+      cn.Close()
+    Catch e As Exception
+      cmd.Dispose()
+      cn.Close()
+      MessageBox.Show(e.Message)
+      Exit Sub
+    End Try
+
+    If num_tickers_db <= 0 Then
+      MessageBox.Show("No ticker symbols found in database")
+      Exit Sub
+    End If
+    Dim tickers_db$() = lstTickersDb.ToArray
+    Dim dates1$() = lstDates1.ToArray
+    Array.Sort(tickers_db, dates1)
+
+    Dim fileEntries As String() = Directory.GetFiles(response_folder)
+    Dim fileName As String
+    For Each fileName In fileEntries
+      File.Delete(fileName)
+    Next fileName
+    Dim fileEntries1 As String() = Directory.GetFiles(csv_folder)
+    For Each fileName In fileEntries1
+      File.Delete(fileName)
+    Next fileName
+
+    Dim StartDate As Date
+    Dim CurrentDate = Date.Now()
+    Dim CurrentDate1 As Date = CurrentDate.Date
+    CurrentDate1 = CurrentDate1.AddDays(3.0) ' Add some days
+    Dim epoch As New DateTime(1970, 1, 1, 0, 0, 0, 0)
+
+    Dim num_requests%, date2$
+    num_requests = 0
+    For i = 0 To num_tickers - 1
+      Application.DoEvents()
+      num_requests = num_requests + 1
+      If num_requests > 5 Then
+        Thread.Sleep(65000) ' pause for 1 minute 5 seconds
+        num_requests = 1
+      End If
+
+      If num_tickers_db <= 0 Then
+        date2 = "0"
+      Else
+        Dim index1% = Array.BinarySearch(tickers_db, tickers(i))
+        If index1 >= 0 Then
+          date2 = dates1(index1)
+        Else
+          date2 = "0"
+        End If
+      End If
+
+      If date2 = "0" Then
+        s2 = epoch.ToString("yyyy-MM-dd")
+      Else
+        year1 = CInt(Mid$(date2, 1, 4))
+        month1 = CInt(Mid$(date2, 5, 2))
+        day1 = CInt(Mid$(date2, 7, 2))
+        Dim d As New Date(year1, month1, day1)
+        StartDate = d.AddDays(-5.0)  ' Go back 5 days
+        s2 = StartDate.ToString("yyyy-MM-dd")
+      End If
+      s3 = CurrentDate1.ToString("yyyy-MM-dd")
+      url = "https://api.polygon.io/v2/aggs/ticker/" & tickers(i) & "/range/1/day/" & s2 & "/" & s3 & "?apiKey=" & polygon_io_API_key
+
+      Dim response As Http.HttpResponseMessage
+      response = Await client.GetAsync(url)
+      ' will throw an exception if Not successful
+      response.EnsureSuccessStatusCode()
+      content = Await response.Content.ReadAsStringAsync()
+      file_price_history_response = response_folder & "\" & tickers(i) & "_response.txt"
+      file_price_history = csv_folder & "\" & tickers(i) & ".csv"
+      If File.Exists(file_price_history_response) Then File.Delete(file_price_history_response)
+      Dim writer As New StreamWriter(file_price_history_response)
+      writer.Write(content)
+      writer.Close()
+
+      Dim date1$, open1$, high1$, low1$, close1$, volume1$
+      Dim i32 As Int32
+      Dim jss = Newtonsoft.Json.JsonConvert.DeserializeObject(Of Object)(content)
+      n = jss("results").count()
+      If n > 0 Then
+        If File.Exists(file_price_history) Then File.Delete(file_price_history)
+        Dim writer1 As New StreamWriter(file_price_history)
+        writer1.WriteLine("rows")
+        writer1.WriteLine(Trim$(n.ToString))
+        s = "Date,Open,High,Low,Close,Volume"
+        writer1.WriteLine(s)
+        Dim t#
+        Dim dt As Date
+        For i32 = 0 To n - 1
+          t = jss("results")(i32)("t").ToString
+          dt = epoch
+          dt = dt.AddMilliseconds(t)
+          date1 = dt.ToString("yyyyMMdd")
+          open1 = jss("results")(i32)("o").ToString
+          high1 = jss("results")(i32)("h").ToString
+          low1 = jss("results")(i32)("l").ToString
+          close1 = jss("results")(i32)("c").ToString
+          volume1 = jss("results")(i32)("v").ToString
+          s = date1 & "," & open1 & "," & high1 & "," & low1 & "," & close1 & "," & volume1
+          writer1.WriteLine(s)
+        Next
+        writer1.Close()
+        count = i + 1
+        Form1.lblCount.Text = Trim(count.ToString)
+      End If
+    Next
+    MessageBox.Show("Download finished")
+  End Sub
+
   Async Sub DownloadFundamental(file_consumer_key$, file_access_token$, ticker_list_file$, response_folder$, data_source$)
     Dim consumer_key$, access_token$, content$
     Dim file_price_history_response$
-    Dim err%, i%, count%
+    Dim err%, i%, count%, limit%, limit1%
     Dim url$
 
+    limit = 299
+    limit1 = 500
     access_token = ""
     consumer_key = ""
     err = ReadTextFromFile(file_consumer_key, consumer_key)
@@ -376,14 +630,14 @@ Module Module1
     err = ReadTextFromFile(file_access_token, access_token)
     If err < 0 Then Exit Sub
 
-    Dim tickers$(0 To 299), num_tickers%, line$
+    Dim tickers$(0 To limit), num_tickers%, line$
     num_tickers = 0
     Try
       Dim reader As New StreamReader(ticker_list_file)
-      While Not reader.EndOfStream
+      While Not reader.EndOfStream And num_tickers <= limit
         line = reader.ReadLine()
         If (line Is Nothing) Then Exit While
-        line = line.Trim
+        line = line.Trim.ToUpper
         If line.Length > 0 Then
           'Dim items = line.Split(",")
           tickers(num_tickers) = line
@@ -400,7 +654,7 @@ Module Module1
       MessageBox.Show("No ticker symbols found in ticker symbol list file")
     End If
 
-    Dim tickers_db$(0 To 500), dates1$(0 To 500), num_tickers_db%
+    Dim tickers_db$(0 To limit1), dates1$(0 To limit1), num_tickers_db%
     Dim market_price_db$ = "Data Source=" & data_source & ";Initial Catalog=market_data;Integrated Security=True;"
     Dim cn As New SqlConnection() ' Don't put this statement in a try block; it throws an exception!!!
     cn.ConnectionString = market_price_db
@@ -414,7 +668,7 @@ Module Module1
       cmd.CommandText = "SELECT * from dbo.[Get_Last_Date]"
       dr = cmd.ExecuteReader
       num_tickers_db = 0
-      While dr.Read()
+      While dr.Read() And num_tickers_db <= limit1
         tickers_db(num_tickers_db) = dr("Ticker")
         dates1(num_tickers_db) = dr("Last_Date")
         num_tickers_db = num_tickers_db + 1
@@ -498,7 +752,7 @@ Module Module1
   End Function
 
   Sub UpdateDatabase(csv_folder$, data_source$)
-    Dim line$, file_names$(0 To 299)
+    Dim line$
     Dim csvFiles = Directory.EnumerateFiles(csv_folder, "*.csv")
 
     If csvFiles.Count > 0 Then
@@ -576,9 +830,10 @@ Module Module1
     End If
   End Sub
   Sub UpdateDatabaseFundamental(response_folder$, data_source$)
-    Dim content$, file_names$(0 To 299), l%, ticker$, num_fields%, num_rows%, i%, s1$, s2$
+    Dim content$, l%, ticker$, num_fields%, num_rows%, i%, s1$, s2$, limit%
     Dim bFound As Boolean
-    Dim field_names$(0 To 100)
+    limit = 100
+    Dim field_names$(0 To limit)
     Dim obj1 As Object
     Dim market_price_db$ = "Data Source=" & data_source & ";Initial Catalog=market_data;Integrated Security=True;"
 
@@ -592,7 +847,7 @@ Module Module1
       dr = cmd.ExecuteReader
       num_fields = 0
       dr.Read() ' skip first field
-      While dr.Read()
+      While dr.Read() And num_fields <= limit
         field_names(num_fields) = dr("COLUMN_NAME")
         num_fields = num_fields + 1
       End While
@@ -670,30 +925,33 @@ Module Module1
 
               If bFound Then
                 s1 = "update dbo.[fundamentals] set "
-                For i = 0 To num_fields - 2
-                  If field_types(i) = "String" Then
-                    s1 = s1 & "[" & field_names(i) & "]='" & field_values(i) & "',"
-                  Else
-                    s1 = s1 & "[" & field_names(i) & "]=" & field_values(i) & ","
+                Dim ii% = 0
+                For i = 0 To num_fields - 1
+                  If field_types(i) <> "" Then
+                    If ii > 0 Then s1 &= ","
+                    If field_types(i) = "String" Then
+                      s1 = s1 & "[" & field_names(i) & "]='" & field_values(i) & "'"
+                    Else
+                      s1 = s1 & "[" & field_names(i) & "]=" & field_values(i)
+                    End If
+                    ii += 1
                   End If
                 Next
-                If field_types(num_fields - 1) = "String" Then
-                  s1 = s1 & "[" & field_names(num_fields - 1) & "]='" & field_values(num_fields - 1) & "' where [ticker]='" & ticker & "'"
-                Else
-                  s1 = s1 & "[" & field_names(num_fields - 1) & "]=" & field_values(num_fields - 1) & " where [ticker]='" & ticker & "'"
-                End If
+                s1 = s1 & " where [ticker]='" & ticker & "'"
                 cmd.CommandText = s1
                 num_rows = cmd.ExecuteNonQuery()
               Else
                 s1 = "insert into dbo.[fundamentals] values('" & ticker & "'"
                 For i = 0 To num_fields - 1
-                  If field_types(i) = "String" Then
+                  If field_types(i) = "" Then
+                    s1 = s1 & "," & "NULL"
+                  ElseIf field_types(i) = "String" Then
                     s1 = s1 & ",'" & field_values(i) & "'"
                   Else
                     s1 = s1 & "," & field_values(i)
                   End If
                 Next
-                s1 = s1 & ")"
+                s1 &= ")"
                 cmd.CommandText = s1
                 num_rows = cmd.ExecuteNonQuery()
               End If
@@ -710,9 +968,11 @@ Module Module1
     cn.Close()
   End Sub
   Sub UpdateTickerList(indicator_file$, ticker_list_file$, data_source$)
-    Dim line$, n%, i%, j%, k%
-    Dim file_names$(0 To 9)
-    Dim tickers$(0 To 299), num_tickers%
+    Dim line$, n%, i%, j%, k%, limit%, limit1%
+    limit = 9
+    limit1 = 299
+    Dim file_names$(0 To limit)
+    Dim tickers$(0 To limit1), num_tickers%
 
     If File.Exists(ticker_list_file) = True Then
       File.Delete(ticker_list_file)
@@ -725,7 +985,7 @@ Module Module1
     n = 0
     Try
       Dim reader As New StreamReader(indicator_file)
-      While Not reader.EndOfStream
+      While Not reader.EndOfStream And n <= limit
         line = reader.ReadLine()
         If (line Is Nothing) Then Exit While
         line = line.Trim
@@ -775,7 +1035,7 @@ Module Module1
         EndRow = oRange1.Row
         NumRows = EndRow - StartRow + 1
         For j = 1 To NumRows
-          s1 = Trim(oSheet.Cells(StartRow + j - 1, 2).value)
+          s1 = UCase(Trim(oSheet.Cells(StartRow + j - 1, 2).value))
           If s1.Length > 0 Then
             If num_tickers > 0 Then
               bFound = False
@@ -788,10 +1048,12 @@ Module Module1
               If Not bFound Then
                 tickers(num_tickers) = s1
                 num_tickers = num_tickers + 1
+                If num_tickers > limit1 Then Exit For
               End If
             Else
               tickers(num_tickers) = s1
               num_tickers = num_tickers + 1
+              If num_tickers > limit1 Then Exit For
             End If
           End If
         Next
