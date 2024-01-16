@@ -124,9 +124,16 @@
     <value>159, 17</value>
   </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>30</value>
+    <value>50</value>
   </metadata>
-  <metadata name="MenuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>288, 17</value>
-  </metadata>
+  <data name="Label3.Text" xml:space="preserve">
+    <value>This allows OHLC values to be imported into the database before the market closes.
+The Yahoo "Current Price"column is used as the close.
+The CSV file exported from a Yahoo Portfolio is only imported for one day.
+This can create a gap in the historical data if the previous market day has not been imported into the database.
+If the OHLC values are imported before the market closes then they need to be overwrittem later with the
+values after the close (using another Yahoo file or the trading API data).
+The Yahoo file needs to include all of the ticker symbols in the ticker symbol list or an error is returned.
+The ticker symbol must already be present in the database (since having only one day would make no sense).</value>
+  </data>
 </root>

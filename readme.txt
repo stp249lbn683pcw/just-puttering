@@ -38,6 +38,29 @@ folder; the same file as the executable). I cannot check the TD Ameritrade
 option any more since my account was moved to Schwab so I am hoping that these
 changes have not inadvertently disabled it.
 
+Update on 1/15/2024
+I need the OHLC values for the current day before the market closes so I will
+have time to run the historical data through my programs before the market
+closes and decide whether to buy or sell stocks.  I could do this with the
+TD Ameritrade API by downloading the data to the database before the market
+closed and then downloading the data again after the market closed to update
+the database to the actual closing values.
+
+Since I can longer do that, I added an option to import the OHLC values for a
+single day from a CSV file that has been exported from a Yahoo portfolio. I
+made it a menu item because I did not want to clutter the screen with another
+button. The "Current Price" column is used as the close. The Yahoo portfolio
+needs to contain all the ticker symbols that are in the ticker symbol list file
+and some data for the ticker symbol needs to be already present in the database
+or an error is returned. This needs to be done carefully because it could
+create a gap in the historical data if the data from the previous market day is
+not present in the database. The data would also need to be overwritten after
+the market close using another Yahoo file or a download from a trading API.
+Also, since BRK.B for example is BRK-B, the program presently replaces the "."
+in the ticker symbol with "-" before searching for the Yahoo name.  This is a
+confusing issue since Schwab uses BRK/B so I don't know how I'll handle that
+in the future.
+
 The original description of the program is below:
 
 This folder contains an example of using TD Ameritrade’s Web API (see developer.tdameritrade.com) to maintain and update a database of 

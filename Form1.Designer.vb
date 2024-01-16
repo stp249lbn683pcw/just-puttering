@@ -46,12 +46,15 @@ Partial Class Form1
         Me.ErrorProvider1 = New System.Windows.Forms.ErrorProvider(Me.components)
         Me.Label3 = New System.Windows.Forms.Label()
         Me.cmbTradingAPI = New System.Windows.Forms.ComboBox()
+        Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
+        Me.ImportYahooFileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.ErrorProvider1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
         'butGetRefreshToken
         '
-        Me.butGetRefreshToken.Location = New System.Drawing.Point(27, 199)
+        Me.butGetRefreshToken.Location = New System.Drawing.Point(16, 224)
         Me.butGetRefreshToken.Name = "butGetRefreshToken"
         Me.butGetRefreshToken.Size = New System.Drawing.Size(146, 23)
         Me.butGetRefreshToken.TabIndex = 0
@@ -60,7 +63,7 @@ Partial Class Form1
         '
         'butGetAccessToken
         '
-        Me.butGetAccessToken.Location = New System.Drawing.Point(27, 249)
+        Me.butGetAccessToken.Location = New System.Drawing.Point(16, 274)
         Me.butGetAccessToken.Name = "butGetAccessToken"
         Me.butGetAccessToken.Size = New System.Drawing.Size(146, 23)
         Me.butGetAccessToken.TabIndex = 1
@@ -69,7 +72,7 @@ Partial Class Form1
         '
         'butUpdateTickerList
         '
-        Me.butUpdateTickerList.Location = New System.Drawing.Point(210, 199)
+        Me.butUpdateTickerList.Location = New System.Drawing.Point(199, 224)
         Me.butUpdateTickerList.Name = "butUpdateTickerList"
         Me.butUpdateTickerList.Size = New System.Drawing.Size(362, 23)
         Me.butUpdateTickerList.TabIndex = 4
@@ -78,7 +81,7 @@ Partial Class Form1
         '
         'butDownload
         '
-        Me.butDownload.Location = New System.Drawing.Point(210, 249)
+        Me.butDownload.Location = New System.Drawing.Point(199, 274)
         Me.butDownload.Name = "butDownload"
         Me.butDownload.Size = New System.Drawing.Size(265, 23)
         Me.butDownload.TabIndex = 5
@@ -87,7 +90,7 @@ Partial Class Form1
         '
         'butUpdate
         '
-        Me.butUpdate.Location = New System.Drawing.Point(210, 288)
+        Me.butUpdate.Location = New System.Drawing.Point(199, 313)
         Me.butUpdate.Name = "butUpdate"
         Me.butUpdate.Size = New System.Drawing.Size(216, 23)
         Me.butUpdate.TabIndex = 6
@@ -96,7 +99,7 @@ Partial Class Form1
         '
         'butDownload1
         '
-        Me.butDownload1.Location = New System.Drawing.Point(543, 249)
+        Me.butDownload1.Location = New System.Drawing.Point(532, 274)
         Me.butDownload1.Name = "butDownload1"
         Me.butDownload1.Size = New System.Drawing.Size(269, 23)
         Me.butDownload1.TabIndex = 8
@@ -106,7 +109,7 @@ Partial Class Form1
         'lblCount
         '
         Me.lblCount.BackColor = System.Drawing.SystemColors.ButtonFace
-        Me.lblCount.Location = New System.Drawing.Point(367, 470)
+        Me.lblCount.Location = New System.Drawing.Point(356, 495)
         Me.lblCount.Name = "lblCount"
         Me.lblCount.Size = New System.Drawing.Size(80, 25)
         Me.lblCount.TabIndex = 9
@@ -114,7 +117,7 @@ Partial Class Form1
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(367, 446)
+        Me.Label1.Location = New System.Drawing.Point(356, 471)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(86, 13)
         Me.Label1.TabIndex = 10
@@ -122,7 +125,7 @@ Partial Class Form1
         '
         'butUpdate1
         '
-        Me.butUpdate1.Location = New System.Drawing.Point(543, 288)
+        Me.butUpdate1.Location = New System.Drawing.Point(532, 313)
         Me.butUpdate1.Name = "butUpdate1"
         Me.butUpdate1.Size = New System.Drawing.Size(216, 23)
         Me.butUpdate1.TabIndex = 11
@@ -131,7 +134,7 @@ Partial Class Form1
         '
         'butUpdateFundamental
         '
-        Me.butUpdateFundamental.Location = New System.Drawing.Point(210, 399)
+        Me.butUpdateFundamental.Location = New System.Drawing.Point(199, 424)
         Me.butUpdateFundamental.Name = "butUpdateFundamental"
         Me.butUpdateFundamental.Size = New System.Drawing.Size(216, 23)
         Me.butUpdateFundamental.TabIndex = 13
@@ -140,7 +143,7 @@ Partial Class Form1
         '
         'butDownloadFundamental
         '
-        Me.butDownloadFundamental.Location = New System.Drawing.Point(210, 360)
+        Me.butDownloadFundamental.Location = New System.Drawing.Point(199, 385)
         Me.butDownloadFundamental.Name = "butDownloadFundamental"
         Me.butDownloadFundamental.Size = New System.Drawing.Size(294, 23)
         Me.butDownloadFundamental.TabIndex = 12
@@ -149,7 +152,7 @@ Partial Class Form1
         '
         'butUpdateFundamental1
         '
-        Me.butUpdateFundamental1.Location = New System.Drawing.Point(543, 399)
+        Me.butUpdateFundamental1.Location = New System.Drawing.Point(532, 424)
         Me.butUpdateFundamental1.Name = "butUpdateFundamental1"
         Me.butUpdateFundamental1.Size = New System.Drawing.Size(216, 23)
         Me.butUpdateFundamental1.TabIndex = 15
@@ -158,7 +161,7 @@ Partial Class Form1
         '
         'butDownloadFundamental1
         '
-        Me.butDownloadFundamental1.Location = New System.Drawing.Point(543, 360)
+        Me.butDownloadFundamental1.Location = New System.Drawing.Point(532, 385)
         Me.butDownloadFundamental1.Name = "butDownloadFundamental1"
         Me.butDownloadFundamental1.Size = New System.Drawing.Size(296, 23)
         Me.butDownloadFundamental1.TabIndex = 14
@@ -167,7 +170,7 @@ Partial Class Form1
         '
         'butBrowseList
         '
-        Me.butBrowseList.Location = New System.Drawing.Point(609, 68)
+        Me.butBrowseList.Location = New System.Drawing.Point(598, 93)
         Me.butBrowseList.Name = "butBrowseList"
         Me.butBrowseList.Size = New System.Drawing.Size(75, 23)
         Me.butBrowseList.TabIndex = 18
@@ -177,7 +180,7 @@ Partial Class Form1
         'lblInputFileName
         '
         Me.lblInputFileName.AutoSize = True
-        Me.lblInputFileName.Location = New System.Drawing.Point(165, 56)
+        Me.lblInputFileName.Location = New System.Drawing.Point(154, 81)
         Me.lblInputFileName.Name = "lblInputFileName"
         Me.lblInputFileName.Size = New System.Drawing.Size(181, 13)
         Me.lblInputFileName.TabIndex = 17
@@ -185,14 +188,14 @@ Partial Class Form1
         '
         'txtFileNameList
         '
-        Me.txtFileNameList.Location = New System.Drawing.Point(168, 72)
+        Me.txtFileNameList.Location = New System.Drawing.Point(157, 97)
         Me.txtFileNameList.Name = "txtFileNameList"
         Me.txtFileNameList.Size = New System.Drawing.Size(404, 20)
         Me.txtFileNameList.TabIndex = 16
         '
         'butBrowseList1
         '
-        Me.butBrowseList1.Location = New System.Drawing.Point(609, 125)
+        Me.butBrowseList1.Location = New System.Drawing.Point(598, 150)
         Me.butBrowseList1.Name = "butBrowseList1"
         Me.butBrowseList1.Size = New System.Drawing.Size(75, 23)
         Me.butBrowseList1.TabIndex = 21
@@ -202,7 +205,7 @@ Partial Class Form1
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(165, 113)
+        Me.Label2.Location = New System.Drawing.Point(154, 138)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(190, 13)
         Me.Label2.TabIndex = 20
@@ -210,7 +213,7 @@ Partial Class Form1
         '
         'txtFileNameList1
         '
-        Me.txtFileNameList1.Location = New System.Drawing.Point(168, 129)
+        Me.txtFileNameList1.Location = New System.Drawing.Point(157, 154)
         Me.txtFileNameList1.Name = "txtFileNameList1"
         Me.txtFileNameList1.Size = New System.Drawing.Size(404, 20)
         Me.txtFileNameList1.TabIndex = 19
@@ -226,7 +229,7 @@ Partial Class Form1
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(165, 21)
+        Me.Label3.Location = New System.Drawing.Point(154, 46)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(113, 13)
         Me.Label3.TabIndex = 22
@@ -236,17 +239,32 @@ Partial Class Form1
         '
         Me.cmbTradingAPI.FormattingEnabled = True
         Me.cmbTradingAPI.Items.AddRange(New Object() {"TD Ameritrade", "Polygon.io"})
-        Me.cmbTradingAPI.Location = New System.Drawing.Point(284, 18)
+        Me.cmbTradingAPI.Location = New System.Drawing.Point(273, 43)
         Me.cmbTradingAPI.Name = "cmbTradingAPI"
         Me.cmbTradingAPI.Size = New System.Drawing.Size(121, 21)
         Me.cmbTradingAPI.TabIndex = 23
+        '
+        'MenuStrip1
+        '
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ImportYahooFileToolStripMenuItem})
+        Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
+        Me.MenuStrip1.Name = "MenuStrip1"
+        Me.MenuStrip1.Size = New System.Drawing.Size(849, 24)
+        Me.MenuStrip1.TabIndex = 24
+        Me.MenuStrip1.Text = "MenuStrip1"
+        '
+        'ImportYahooFileToolStripMenuItem
+        '
+        Me.ImportYahooFileToolStripMenuItem.Name = "ImportYahooFileToolStripMenuItem"
+        Me.ImportYahooFileToolStripMenuItem.Size = New System.Drawing.Size(136, 20)
+        Me.ImportYahooFileToolStripMenuItem.Text = "Import Yahoo CSV File"
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.ActiveBorder
-        Me.ClientSize = New System.Drawing.Size(849, 518)
+        Me.ClientSize = New System.Drawing.Size(849, 552)
         Me.Controls.Add(Me.cmbTradingAPI)
         Me.Controls.Add(Me.Label3)
         Me.Controls.Add(Me.butBrowseList1)
@@ -268,9 +286,12 @@ Partial Class Form1
         Me.Controls.Add(Me.butUpdateTickerList)
         Me.Controls.Add(Me.butGetAccessToken)
         Me.Controls.Add(Me.butGetRefreshToken)
+        Me.Controls.Add(Me.MenuStrip1)
         Me.Name = "Form1"
-        Me.Text = "Form1"
+        Me.Text = "Get Stock Data"
         CType(Me.ErrorProvider1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.MenuStrip1.ResumeLayout(False)
+        Me.MenuStrip1.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -299,4 +320,6 @@ Partial Class Form1
     Friend WithEvents ErrorProvider1 As ErrorProvider
     Friend WithEvents cmbTradingAPI As ComboBox
     Friend WithEvents Label3 As Label
+    Friend WithEvents MenuStrip1 As MenuStrip
+    Friend WithEvents ImportYahooFileToolStripMenuItem As ToolStripMenuItem
 End Class

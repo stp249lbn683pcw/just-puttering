@@ -10,7 +10,8 @@
 ' I did not expect them to be exceeded for the number of stock symbols that I expected to use. Note that items that exceed the array sizes
 ' will simply be ignored; there is no error message.
 ' Modified on 4Jan24 to use the Polygon.io API as an alternative to the TD Ameritrade API
-' Last updated on 5Jan24.
+' Modified on 14Jan24 to add a menu item for importing a Yahoo file exported from a portfolio in order to add the OHLC values for one day to be database.
+' Last updated on 15Jan24.
 
 
 Option Strict Off
@@ -46,6 +47,9 @@ Structure INPUTTYPE
   Dim file_access_token$
   ' Polygon.io API
   Dim file_polygon_io_api_key$
+  ' Yahoo file
+  Dim yahoo_file$
+  Dim yahoo1_file$
 End Structure
 
 Module Module1
@@ -73,6 +77,9 @@ Module Module1
       .file_access_token = "c:\access_token.txt"
       ' Polygon.io API
       .file_polygon_io_api_key = "c:\polygon_io_api_key.txt"
+      'Yahoo file
+      .yahoo_file = "c:\yahoo_file.csv"
+      .yahoo1_file = "c:\yahoo1_file.csv"
     End With
   End Sub
 
@@ -129,6 +136,11 @@ Module Module1
             'Polygon.io API
             Case "file_polygon_io_api_key"
               .file_polygon_io_api_key = items(1)
+            'Yahoo file
+            Case "yahoo_file"
+              .yahoo_file = items(1)
+            Case "yahoo1_file"
+              .yahoo1_file = items(1)
           End Select
         End While
       End With
@@ -164,6 +176,11 @@ Module Module1
               .ticker_list1_file = items(1)
             Case "trading_API"
               .trading_API = items(1)
+            'Yahoo file
+            Case "yahoo_file"
+              .yahoo_file = items(1)
+            Case "yahoo1_file"
+              .yahoo1_file = items(1)
           End Select
         End While
       End With
@@ -184,6 +201,9 @@ Module Module1
         writer1.WriteLine("ticker_list_file," & .ticker_list_file.Trim)
         writer1.WriteLine("ticker_list1_file," & .ticker_list1_file.Trim)
         writer1.WriteLine("trading_API," & .trading_API.Trim)
+        'Yahoo file
+        writer1.WriteLine("yahoo_file," & .yahoo_file.Trim)
+        writer1.WriteLine("yahoo1_file," & .yahoo1_file.Trim)
       End With
       writer1.Close()
     Catch e As Exception
@@ -829,6 +849,260 @@ Module Module1
       MessageBox.Show("Database Update : no files found in folder")
     End If
   End Sub
+  Function ReadInputFile(file_name$) As DataTable
+    ReadInputFile = Nothing
+    Dim symbol_col% = -1
+    Dim date_col = -1
+    Dim open_col% = -1
+    Dim high_col% = -1
+    Dim low_col% = -1
+    Dim close_col = -1
+    Dim volume_col% = -1
+
+    If (Dir(file_name) = "" Or (Not File.Exists(file_name))) Then
+      MessageBox.Show("File " & file_name & " was not found")
+      Exit Function
+    End If
+    Dim line$ = "", count% = 0
+
+    Dim i%, j%, n%, num_vars%, s1$
+    Dim dt As New DataTable
+    Try
+      Dim reader As New StreamReader(file_name)
+      While (Not reader.EndOfStream)
+        line = reader.ReadLine()
+        If (line Is Nothing) Then Exit Function
+        line = line.Trim
+        If line.Length <= 0 Then Exit Function
+        Dim items = line.Split(",")
+        n = items.Length
+        If n < 7 Then Exit Function
+        If items(0).Trim.Length <= 0 Then Exit Function
+
+        Dim dr = dt.NewRow()
+        If count = 0 Then
+          num_vars = 0
+          For i = 0 To n - 1
+            s1 = items(i).Trim
+            If s1.Equals("Symbol") Then
+              num_vars += 1
+              symbol_col = i
+            ElseIf s1.Equals("Date") Then
+              num_vars += 1
+              date_col = i
+            ElseIf s1.Equals("Current Price") Then
+              num_vars += 1
+              close_col = i
+            ElseIf s1.Equals("Open") Then
+              num_vars += 1
+              open_col = i
+            ElseIf s1.Equals("High") Then
+              num_vars += 1
+              high_col = i
+            ElseIf s1.Equals("Low") Then
+              num_vars += 1
+              low_col = i
+            ElseIf s1.Equals("Volume") Then
+              num_vars += 1
+              volume_col = i
+            End If
+          Next
+          If num_vars <> 7 Then Exit Function
+
+          dt.Columns.Add("Symbol")
+          dt.Columns.Add("Date")
+          dt.Columns.Add("Open")
+          dt.Columns.Add("High")
+          dt.Columns.Add("Low")
+          dt.Columns.Add("Close")
+          dt.Columns.Add("Volume")
+        Else
+          j = 0
+          dr(j) = items(symbol_col).Trim
+          j += 1
+          dr(j) = items(date_col).Trim
+          j += 1
+          dr(j) = items(open_col).Trim
+          j += 1
+          dr(j) = items(high_col).Trim
+          j += 1
+          dr(j) = items(low_col).Trim
+          j += 1
+          dr(j) = items(close_col).Trim
+          j += 1
+          dr(j) = items(volume_col).Trim
+          dt.Rows.Add(dr)
+        End If
+        count += 1
+      End While
+      reader.Close()
+    Catch e As Exception
+      MessageBox.Show("Error In file " & file_name & ": " & e.Message)
+      Exit Function
+    End Try
+    ReadInputFile = dt
+  End Function
+  Function ImportYahooFile(yahoo_file$, ticker_list_file$, response_folder$, csv_folder$, data_source$)
+    ImportYahooFile = -1
+    Dim file_price_history$
+    Dim i%, n%, count%, s$
+
+    If Not File.Exists(yahoo_file) Then Exit Function
+    Dim dt_if = ReadInputFile(yahoo_file)
+    If IsNothing(dt_if) Then
+      Exit Function
+    End If
+    Dim num_tickers_if% = dt_if.Rows.Count
+    If num_tickers_if <= 0 Then
+      Exit Function
+    End If
+
+    Dim dv = dt_if.DefaultView
+    dv.Sort = "Symbol ASC"
+    dt_if = dv.ToTable
+    Dim tickers_if = dt_if.AsEnumerable.Select(Function(xx) xx(“Symbol”).ToString).ToArray
+
+    ' read ticker symbol list file
+    Dim num_tickers%, line$
+    Dim lstTickers As New List(Of String)
+    num_tickers = 0
+    Try
+      Dim reader As New StreamReader(ticker_list_file)
+      While Not reader.EndOfStream
+        line = reader.ReadLine()
+        If (line Is Nothing) Then Exit While
+        line = line.Trim.ToUpper
+        If line.Length > 0 Then
+          'Dim items = line.Split(",")
+          lstTickers.Add(line)
+          num_tickers += 1
+        End If
+      End While
+      reader.Close()
+    Catch e As Exception
+      MessageBox.Show("Error in file " & ticker_list_file & ": " & e.Message)
+      Exit Function
+    End Try
+
+    If num_tickers <= 0 Then
+      MessageBox.Show("No ticker symbols found in file " & ticker_list_file)
+      Exit Function
+    End If
+    Dim tickers = lstTickers.ToArray
+
+    ' get dates from database
+    Dim lstTickersDb, lstDates1 As New List(Of String)
+    Dim num_tickers_db%
+    Dim market_price_db$ = "Data Source=" & data_source & ";Initial Catalog=market_data;Integrated Security=True;"
+    Dim cn As New SqlConnection() ' Don't put this statement in a try block; it throws an exception!!!
+    cn.ConnectionString = market_price_db
+    cn.Open()
+
+    Dim cmd As New SqlCommand, dr As SqlDataReader
+    Try
+      'Dim cn As New SqlConnection(market_price_db)
+
+      cmd.Connection = cn
+      cmd.CommandText = "Select * from dbo.[Get_Last_Date]"
+      dr = cmd.ExecuteReader
+      num_tickers_db = 0
+      While dr.Read()
+        lstTickersDb.Add(dr("Ticker"))
+        lstDates1.Add(dr("Last_Date"))
+        num_tickers_db += 1
+      End While
+      dr.Close()
+      cmd.Dispose()
+      cn.Close()
+    Catch e As Exception
+      cmd.Dispose()
+      cn.Close()
+      MessageBox.Show(e.Message)
+      Exit Function
+    End Try
+
+    If num_tickers_db <= 0 Then
+      MessageBox.Show("No ticker symbols found in database")
+      Exit Function
+    End If
+    Dim tickers_db = lstTickersDb.ToArray
+    Dim dates1 = lstDates1.ToArray
+    Array.Sort(tickers_db, dates1)
+
+    ' delete the old files
+    Dim fileEntries As String() = Directory.GetFiles(response_folder)
+    Dim fileName As String
+    For Each fileName In fileEntries
+      File.Delete(fileName)
+    Next fileName
+    Dim fileEntries1 As String() = Directory.GetFiles(csv_folder)
+    For Each fileName In fileEntries1
+      File.Delete(fileName)
+    Next fileName
+
+    Dim CurrentDate As Date
+    CurrentDate = dt_if.Rows(0).Item("Date").ToString
+
+    Dim date2
+    For i = 0 To num_tickers - 1
+      Application.DoEvents()
+
+      'find date in database
+      If num_tickers_db <= 0 Then
+        date2 = "0"
+      Else
+        Dim index1% = Array.BinarySearch(tickers_db, tickers(i))
+        If index1 >= 0 Then
+          date2 = dates1(index1)
+        Else
+          date2 = "0"
+        End If
+      End If
+      If date2 = "0" Then
+        MessageBox.Show("Error finding ticker " & tickers(i) & " in the database")
+        Exit Function
+      End If
+
+      ' yahoo ticker symbol is BRK-B instead of BRK.B for example, so we need to replace "." with "-"
+      ' Of course this depends on what is in the database which depends on the trading API. I wish this was standardized!
+      Dim ticker1$ = tickers(i)
+      Dim index3% = ticker1.IndexOf(".")
+      If index3 > 0 Then
+        ticker1 = ticker1.Replace(".", "-")
+      End If
+      Dim index2% = Array.BinarySearch(tickers_if, ticker1)
+      If index2 < 0 Then
+        MessageBox.Show("Error finding ticker " & tickers(i) & " in Yahoo file")
+        Exit Function
+      End If
+
+      ' save the output files in a format that can be used by the database update
+      file_price_history = csv_folder & "\" & tickers(i) & ".csv"
+
+      Dim date1$, open1$, high1$, low1$, close1$, volume1$
+      n = 1
+      If File.Exists(file_price_history) Then File.Delete(file_price_history)
+      Dim writer1 As New StreamWriter(file_price_history)
+      writer1.WriteLine("rows")
+      writer1.WriteLine(Trim$(n.ToString))
+      s = "Date,Open,High,Low,Close,Volume"
+      writer1.WriteLine(s)
+      date1 = CurrentDate.ToString("yyyyMMdd")
+      open1 = dt_if.Rows(index2).Item("Open").ToString
+      high1 = dt_if.Rows(index2).Item("High").ToString
+      low1 = dt_if.Rows(index2).Item("Low").ToString
+      close1 = dt_if.Rows(index2).Item("Close").ToString
+      volume1 = dt_if.Rows(index2).Item("Volume").ToString
+      s = date1 & "," & open1 & "," & high1 & "," & low1 & "," & close1 & "," & volume1
+      writer1.WriteLine(s)
+      writer1.Close()
+      count = i + 1
+      Form2.lblCount.Text = Trim(count.ToString)
+    Next
+    MessageBox.Show("Yahoo import finished")
+    ImportYahooFile = 0
+  End Function
+
   Sub UpdateDatabaseFundamental(response_folder$, data_source$)
     Dim content$, l%, ticker$, num_fields%, num_rows%, i%, s1$, s2$, limit%
     Dim bFound As Boolean

@@ -23,26 +23,27 @@ Public Class Form1
     Dim AppPath$, error1%, sFileName$, ticker_list_file$, ticker_list1_file$, trading_API$
     AppPath = Application.StartupPath
     sFileName = AppPath & "\entries.ini"
+
     With UserInput
-      trading_API = .trading_API
-      .trading_API = cmbTradingAPI.Text.Trim
-      ticker_list_file = .ticker_list_file
-      ticker_list1_file = .ticker_list1_file
-      .ticker_list_file = txtFileNameList.Text.Trim
-      .ticker_list1_file = txtFileNameList1.Text.Trim
-      If ticker_list_file <> txtFileNameList.Text.Trim Or ticker_list1_file <> txtFileNameList1.Text.Trim Or trading_API <> cmbTradingAPI.Text.Trim Then
-        error1 = SaveEntries(sFileName)
-        If error1 < 0 Then
-          MessageBox.Show("Error saving file " & sFileName)
-          Exit Sub
-        End If
-      End If
+      trading_API = cmbTradingAPI.Text.Trim
+      ticker_list_file = txtFileNameList.Text.Trim
+      ticker_list1_file = txtFileNameList1.Text.Trim
     End With
 
     lblCount.Text = ""
     Me.Cursor = Cursors.WaitCursor
     With UserInput
-      Call UpdateTickerList(.indicator_file, .ticker_list_file, .data_source)
+      Call UpdateTickerList(.indicator_file, ticker_list_file, .data_source)
+
+      If ticker_list_file <> .ticker_list_file Or ticker_list1_file <> .ticker_list1_file Or trading_API <> .trading_API Then
+        .trading_API = trading_API
+        .ticker_list_file = ticker_list_file
+        .ticker_list1_file = ticker_list1_file
+        error1 = SaveEntries(sFileName)
+        If error1 < 0 Then
+          MessageBox.Show("Error saving file " & sFileName)
+        End If
+      End If
     End With
     Me.Cursor = Cursors.Default
   End Sub
@@ -77,30 +78,31 @@ Public Class Form1
     Dim AppPath$, error1%, sFileName$, ticker_list_file$, ticker_list1_file$, trading_API$
     AppPath = Application.StartupPath
     sFileName = AppPath & "\entries.ini"
+
     With UserInput
-      trading_API = .trading_API
-      .trading_API = cmbTradingAPI.Text.Trim
-      ticker_list_file = .ticker_list_file
-      ticker_list1_file = .ticker_list1_file
-      .ticker_list_file = txtFileNameList.Text.Trim
-      .ticker_list1_file = txtFileNameList1.Text.Trim
-      If ticker_list_file <> txtFileNameList.Text.Trim Or ticker_list1_file <> txtFileNameList1.Text.Trim Or trading_API <> cmbTradingAPI.Text.Trim Then
-        error1 = SaveEntries(sFileName)
-        If error1 < 0 Then
-          MessageBox.Show("Error saving file " & sFileName)
-          Exit Sub
-        End If
-      End If
+      trading_API = cmbTradingAPI.Text.Trim
+      ticker_list_file = txtFileNameList.Text.Trim
+      ticker_list1_file = txtFileNameList1.Text.Trim
     End With
 
     lblCount.Text = ""
     Me.Cursor = Cursors.WaitCursor
     Application.DoEvents()
     With UserInput
-      If .trading_API = "TD Ameritrade" Then
-        Call DownloadHistData(.file_consumer_key, .file_access_token, .ticker_list_file, .response_folder, .csv_folder, .data_source)
-      ElseIf .trading_API = "Polygon.io" Then
-        Call DownloadHistDataPolygonIo(.file_polygon_io_api_key, .ticker_list_file, .response_folder, .csv_folder, .data_source)
+      If trading_API = "TD Ameritrade" Then
+        Call DownloadHistData(.file_consumer_key, .file_access_token, ticker_list_file, .response_folder, .csv_folder, .data_source)
+      ElseIf trading_API = "Polygon.io" Then
+        Call DownloadHistDataPolygonIo(.file_polygon_io_api_key, ticker_list_file, .response_folder, .csv_folder, .data_source)
+      End If
+
+      If ticker_list_file <> .ticker_list_file Or ticker_list1_file <> .ticker_list1_file Or trading_API <> .trading_API Then
+        .trading_API = trading_API
+        .ticker_list_file = ticker_list_file
+        .ticker_list1_file = ticker_list1_file
+        error1 = SaveEntries(sFileName)
+        If error1 < 0 Then
+          MessageBox.Show("Error saving file " & sFileName)
+        End If
       End If
     End With
     Me.Cursor = Cursors.Default
@@ -119,30 +121,31 @@ Public Class Form1
     Dim AppPath$, error1%, sFileName$, ticker_list_file$, ticker_list1_file$, trading_API$
     AppPath = Application.StartupPath
     sFileName = AppPath & "\entries.ini"
+
     With UserInput
-      trading_API = .trading_API
-      .trading_API = cmbTradingAPI.Text.Trim
-      ticker_list_file = .ticker_list_file
-      ticker_list1_file = .ticker_list1_file
-      .ticker_list_file = txtFileNameList.Text.Trim
-      .ticker_list1_file = txtFileNameList1.Text.Trim
-      If ticker_list_file <> txtFileNameList.Text.Trim Or ticker_list1_file <> txtFileNameList1.Text.Trim Or trading_API <> cmbTradingAPI.Text.Trim Then
-        error1 = SaveEntries(sFileName)
-        If error1 < 0 Then
-          MessageBox.Show("Error saving file " & sFileName)
-          Exit Sub
-        End If
-      End If
+      trading_API = cmbTradingAPI.Text.Trim
+      ticker_list_file = txtFileNameList.Text.Trim
+      ticker_list1_file = txtFileNameList1.Text.Trim
     End With
 
     lblCount.Text = ""
     Me.Cursor = Cursors.WaitCursor
     Application.DoEvents()
     With UserInput
-      If .trading_API = "TD Ameritrade" Then
-        Call DownloadHistData(.file_consumer_key, .file_access_token, .ticker_list1_file, .response1_folder, .csv1_folder, .data_source)
-      ElseIf .trading_API = "Polygon.io" Then
-        Call DownloadHistDataPolygonIo(.file_polygon_io_api_key, .ticker_list1_file, .response1_folder, .csv1_folder, .data_source)
+      If trading_API = "TD Ameritrade" Then
+        Call DownloadHistData(.file_consumer_key, .file_access_token, ticker_list1_file, .response1_folder, .csv1_folder, .data_source)
+      ElseIf trading_API = "Polygon.io" Then
+        Call DownloadHistDataPolygonIo(.file_polygon_io_api_key, ticker_list1_file, .response1_folder, .csv1_folder, .data_source)
+      End If
+
+      If ticker_list_file <> .ticker_list_file Or ticker_list1_file <> .ticker_list1_file Or trading_API <> .trading_API Then
+        .trading_API = trading_API
+        .ticker_list_file = ticker_list_file
+        .ticker_list1_file = ticker_list1_file
+        error1 = SaveEntries(sFileName)
+        If error1 < 0 Then
+          MessageBox.Show("Error saving file " & sFileName)
+        End If
       End If
     End With
     Me.Cursor = Cursors.Default
@@ -161,27 +164,28 @@ Public Class Form1
     Dim AppPath$, error1%, sFileName$, ticker_list_file$, ticker_list1_file$, trading_API$
     AppPath = Application.StartupPath
     sFileName = AppPath & "\entries.ini"
+
     With UserInput
-      trading_API = .trading_API
-      .trading_API = cmbTradingAPI.Text.Trim
-      ticker_list_file = .ticker_list_file
-      ticker_list1_file = .ticker_list1_file
-      .ticker_list_file = txtFileNameList.Text.Trim
-      .ticker_list1_file = txtFileNameList1.Text.Trim
-      If ticker_list_file <> txtFileNameList.Text.Trim Or ticker_list1_file <> txtFileNameList1.Text.Trim Or trading_API <> cmbTradingAPI.Text.Trim Then
-        error1 = SaveEntries(sFileName)
-        If error1 < 0 Then
-          MessageBox.Show("Error saving file " & sFileName)
-          Exit Sub
-        End If
-      End If
+      trading_API = cmbTradingAPI.Text.Trim
+      ticker_list_file = txtFileNameList.Text.Trim
+      ticker_list1_file = txtFileNameList1.Text.Trim
     End With
 
     lblCount.Text = ""
     Me.Cursor = Cursors.WaitCursor
     Application.DoEvents()
     With UserInput
-      Call DownloadFundamental(.file_consumer_key, .file_access_token, .ticker_list_file, .fundamental_response_folder, .data_source)
+      Call DownloadFundamental(.file_consumer_key, .file_access_token, ticker_list_file, .fundamental_response_folder, .data_source)
+
+      If ticker_list_file <> .ticker_list_file Or ticker_list1_file <> .ticker_list1_file Or trading_API <> .trading_API Then
+        .trading_API = trading_API
+        .ticker_list_file = ticker_list_file
+        .ticker_list1_file = ticker_list1_file
+        error1 = SaveEntries(sFileName)
+        If error1 < 0 Then
+          MessageBox.Show("Error saving file " & sFileName)
+        End If
+      End If
     End With
     Me.Cursor = Cursors.Default
   End Sub
@@ -199,27 +203,28 @@ Public Class Form1
     Dim AppPath$, error1%, sFileName$, ticker_list_file$, ticker_list1_file$, trading_API$
     AppPath = Application.StartupPath
     sFileName = AppPath & "\entries.ini"
+
     With UserInput
-      trading_API = .trading_API
-      .trading_API = cmbTradingAPI.Text.Trim
-      ticker_list_file = .ticker_list_file
-      ticker_list1_file = .ticker_list1_file
-      .ticker_list_file = txtFileNameList.Text.Trim
-      .ticker_list1_file = txtFileNameList1.Text.Trim
-      If ticker_list_file <> txtFileNameList.Text.Trim Or ticker_list1_file <> txtFileNameList1.Text.Trim Or trading_API <> cmbTradingAPI.Text.Trim Then
-        error1 = SaveEntries(sFileName)
-        If error1 < 0 Then
-          MessageBox.Show("Error saving file " & sFileName)
-          Exit Sub
-        End If
-      End If
+      trading_API = cmbTradingAPI.Text.Trim
+      ticker_list_file = txtFileNameList.Text.Trim
+      ticker_list1_file = txtFileNameList1.Text.Trim
     End With
 
     lblCount.Text = ""
     Me.Cursor = Cursors.WaitCursor
     Application.DoEvents()
     With UserInput
-      Call DownloadFundamental(.file_consumer_key, .file_access_token, .ticker_list1_file, .fundamental_response1_folder, .data_source)
+      Call DownloadFundamental(.file_consumer_key, .file_access_token, ticker_list1_file, .fundamental_response1_folder, .data_source)
+
+      If ticker_list_file <> .ticker_list_file Or ticker_list1_file <> .ticker_list1_file Or trading_API <> .trading_API Then
+        .trading_API = trading_API
+        .ticker_list_file = ticker_list_file
+        .ticker_list1_file = ticker_list1_file
+        error1 = SaveEntries(sFileName)
+        If error1 < 0 Then
+          MessageBox.Show("Error saving file " & sFileName)
+        End If
+      End If
     End With
     Me.Cursor = Cursors.Default
   End Sub
@@ -236,7 +241,6 @@ Public Class Form1
   Private Sub butBrowseList_Click(sender As Object, e As EventArgs) Handles butBrowseList.Click
     Dim s1$, s2$
 
-    'Directory.SetCurrentDirectory(CurrentDir)
     s2 = ""
     s1 = txtFileNameList.Text.Trim
     If s1.Length > 0 Then
@@ -262,7 +266,6 @@ Public Class Form1
   Private Sub butBrowseList1_Click(sender As Object, e As EventArgs) Handles butBrowseList1.Click
     Dim s1$, s2$
 
-    'Directory.SetCurrentDirectory(CurrentDir)
     s2 = ""
     s1 = txtFileNameList1.Text.Trim
     If s1.Length > 0 Then
@@ -290,17 +293,17 @@ Public Class Form1
     AppPath = Application.StartupPath
     sFileName = AppPath & "\entries.ini"
     With UserInput
-      trading_API = .trading_API
-      .trading_API = cmbTradingAPI.Text.Trim
-      ticker_list_file = .ticker_list_file
-      ticker_list1_file = .ticker_list1_file
-      .ticker_list_file = txtFileNameList.Text.Trim
-      .ticker_list1_file = txtFileNameList1.Text.Trim
-      If ticker_list_file <> txtFileNameList.Text.Trim Or ticker_list1_file <> txtFileNameList1.Text.Trim Or trading_API <> cmbTradingAPI.Text.Trim Then
+      trading_API = cmbTradingAPI.Text.Trim
+      ticker_list_file = txtFileNameList.Text.Trim
+      ticker_list1_file = txtFileNameList1.Text.Trim
+
+      If ticker_list_file <> .ticker_list_file Or ticker_list1_file <> .ticker_list1_file Or trading_API <> .trading_API Then
+        .trading_API = trading_API
+        .ticker_list_file = ticker_list_file
+        .ticker_list1_file = ticker_list1_file
         error1 = SaveEntries(sFileName)
         If error1 < 0 Then
           MessageBox.Show("Error saving file " & sFileName)
-          Exit Sub
         End If
       End If
     End With
@@ -322,5 +325,9 @@ Public Class Form1
       butUpdateFundamental.Hide()
       butUpdateFundamental1.Hide()
     End If
+  End Sub
+
+  Private Sub ImportYahooFileToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ImportYahooFileToolStripMenuItem.Click
+    Form2.Show()
   End Sub
 End Class
